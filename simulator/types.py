@@ -71,7 +71,9 @@ class Creature(GameObject):
 
     def produce(self):
         if self.needs_filled and self.inventory.qty < self.max_product_amount:
-            self.inventory.qty += self.producing_per_day
+            if self.minimum_required_age_for_producing < self.age and \
+                self.maximum_allowed_age_for_producing > self.age:
+                self.inventory.qty += self.producing_per_day
 
     def grow_up(self):
         if self.critical_unfilled_needs:
@@ -93,7 +95,6 @@ class Animal(Creature):
     filled_needs_level = 60.
     full_needs_level = 100.
     can_sell = True
-    needs_decreasing_per_day = 30.
 
     def __str__(self):
         return f"{self.name}: возраст {self.age}, сытость {self.needs_level}/{self.full_needs_level}"
@@ -112,7 +113,6 @@ class Plant(Creature):
     critical_needs_level = 60.
     filled_needs_level = 70.
     full_needs_level = 100.
-    needs_decreasing_per_day = 10.
 
     def __str__(self):
         return f"{self.name}: возраст {self.age}, влажность {self.needs_level}/{self.full_needs_level}"
@@ -544,7 +544,7 @@ class Game:
 
 class AnimalFood(ProductItem):
     name = "Еда для животных"
-    buy_price = 3.
+    buy_price = 5.
     
     def __init__(self, qty: float):
         super().__init__()
@@ -571,7 +571,7 @@ class WheatSeed(ProductItem):
 
 class CornSeed(ProductItem):
     name = "Семена кукурузы"
-    buy_price = 7.5
+    buy_price = 6.
 
     def __init__(self, qty: float):
         super().__init__()
@@ -580,7 +580,7 @@ class CornSeed(ProductItem):
 
 class Tuber(ProductItem):
     name = "Картофельный клубень"
-    buy_price = 10.
+    buy_price = 7.
 
     def __init__(self, qty: float):
         super().__init__()
@@ -598,7 +598,7 @@ class Egg(ProductItem):
 
 class Wool(ProductItem):
     name = "Шерсть"
-    buy_price = 50.
+    buy_price = 100.
     
     def __init__(self, qty: float):
         super().__init__()
@@ -607,7 +607,7 @@ class Wool(ProductItem):
 
 class Milk(ProductItem):
     name = "Молоко"
-    buy_price = 40.
+    buy_price = 60.
     
     def __init__(self, qty: float):
         super().__init__()
@@ -621,15 +621,16 @@ class Wheat(Plant):
     name = "Пшеница"
     buy_price = 6.
     age = 0
-    minimum_required_age_for_producing = 5
-    maximum_allowed_age_for_producing = 10
-    max_age = 15
-    producing_per_day = 0.8
-    max_product_amount = 4
+    minimum_required_age_for_producing = 15
+    maximum_allowed_age_for_producing = 25
+    max_age = 26
+    producing_per_day = 4
+    max_product_amount = 12
     product = WheatSeed
     inventory = WheatSeed(0)
     needs = Water
     needs_level = 90
+    needs_decreasing_per_day = 5
 
 
 
@@ -637,30 +638,32 @@ class Corn(Plant):
     name = "Кукуруза"
     buy_price = 8.5
     age = 0
-    minimum_required_age_for_producing = 7
-    maximum_allowed_age_for_producing = 14
-    max_age = 19
-    producing_per_day = 0.8
-    max_product_amount = 5.6
+    minimum_required_age_for_producing = 15
+    maximum_allowed_age_for_producing = 25
+    max_age = 26
+    producing_per_day = 6
+    max_product_amount = 18
     product = CornSeed
     inventory = CornSeed(0)
     needs = Water
     needs_level = 90
+    needs_decreasing_per_day = 7
 
 
 class Potato(Plant):
     name = "Картошка"
     buy_price = 11
     age = 0
-    minimum_required_age_for_producing = 10
-    maximum_allowed_age_for_producing = 20
-    max_age = 25
-    producing_per_day = 1
-    max_product_amount = 10
+    minimum_required_age_for_producing = 15
+    maximum_allowed_age_for_producing = 25
+    max_age = 26
+    producing_per_day = 8
+    max_product_amount = 24
     product = Tuber
     inventory = Tuber(0)
     needs = Water
     needs_level = 90
+    needs_decreasing_per_day = 9
 
 # endregion
 
@@ -668,32 +671,33 @@ class Potato(Plant):
 
 class Hen(Animal):
     name = "Курица"
-    buy_price = 25
+    buy_price = 30
     age = 3
-    minimum_required_age_for_producing = 6
-    maximum_allowed_age_for_producing = 20
-    max_age = 25
-    producing_per_day = 1
-    max_product_amount = 14
+    minimum_required_age_for_producing = 5
+    maximum_allowed_age_for_producing = 45
+    max_age = 50
+    producing_per_day = 2
+    max_product_amount = 6
     product = Egg
     inventory = Egg(0)
     needs = AnimalFood
     needs_level = 90
-
+    needs_decreasing_per_day = 5
 
 class Sheep(Animal):
     name = "Овца"
     buy_price = 50
     age = 3
     minimum_required_age_for_producing = 10
-    maximum_allowed_age_for_producing = 45
-    max_age = 50
-    producing_per_day = 0.1
-    max_product_amount = 3.5
+    maximum_allowed_age_for_producing = 75
+    max_age = 80
+    producing_per_day = 1
+    max_product_amount = 3
     product = Wool
     inventory = Wool(0)
     needs = AnimalFood
     needs_level = 90
+    needs_decreasing_per_day = 15
 
 
 class Cow(Animal):
@@ -701,14 +705,15 @@ class Cow(Animal):
     buy_price = 150
     age = 3
     minimum_required_age_for_producing = 15
-    maximum_allowed_age_for_producing = 60
-    max_age = 70
-    producing_per_day = 1.
-    max_product_amount = 3.5
+    maximum_allowed_age_for_producing = 95
+    max_age = 100
+    producing_per_day = 3
+    max_product_amount = 3
     product = Milk
     inventory = Milk(0)
     needs = AnimalFood
     needs_level = 90
+    needs_decreasing_per_day = 25
 
 # endregion
 
