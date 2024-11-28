@@ -216,7 +216,7 @@ class Farm(GameObject):
 
     def tick(self):
         for building in self.buildings:
-            for creature in building.inventory:
+            for creature in building.inventory[:]:
                 try:
                     creature.tick()
                 except exceptions.DeathDueBigAge:
@@ -231,7 +231,6 @@ class Farm(GameObject):
                     else:
                         print(f"{creature.name} засохла без полива.")
                     building.inventory.remove(creature)
-                continue
 
 
 class Player:
@@ -364,19 +363,25 @@ class Game:
         
         selected_option = list(filter(lambda x: x.key == answer, options))
         if len(selected_option) == 0:
-            self._ask_player(question, options)
+            return self._ask_player(question, options)
         else:
             return selected_option[0]
         
     @check_action_availability
     def _feed_animals(self):
-        self.player.feed_animals()
-        print("Вы покормили животных.")
+        try:
+            self.player.feed_animals()
+            print("Вы покормили животных.")
+        except exceptions.NoSuchProduct:
+            print("Нет еды для животных на складе!")
 
     @check_action_availability
     def _pour_plants(self):
-        self.player.pour_plants()
-        print("Вы полили растения.")
+        try:
+            self.player.pour_plants()
+            print("Вы полили растения.")
+        except exceptions.NoSuchProduct:
+            print("Нет воды на складе!")
 
     @check_action_availability
     def _get_animal_products(self):
@@ -620,50 +625,58 @@ class Milk(ProductItem):
 class Wheat(Plant):
     name = "Пшеница"
     buy_price = 6.
-    age = 0
     minimum_required_age_for_producing = 15
     maximum_allowed_age_for_producing = 25
     max_age = 26
     producing_per_day = 4
     max_product_amount = 12
     product = WheatSeed
-    inventory = WheatSeed(0)
     needs = Water
-    needs_level = 90
     needs_decreasing_per_day = 5
 
+    def __init__(self) -> None:
+        super().__init__()
+        self.age = 0
+        self.needs_level = 90
+        self.inventory = WheatSeed(0)
 
 
 class Corn(Plant):
     name = "Кукуруза"
     buy_price = 8.5
-    age = 0
     minimum_required_age_for_producing = 15
     maximum_allowed_age_for_producing = 25
     max_age = 26
     producing_per_day = 6
     max_product_amount = 18
     product = CornSeed
-    inventory = CornSeed(0)
     needs = Water
-    needs_level = 90
     needs_decreasing_per_day = 7
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.age = 0
+        self.needs_level = 90
+        self.inventory = CornSeed(0)
 
 
 class Potato(Plant):
     name = "Картошка"
     buy_price = 11
-    age = 0
     minimum_required_age_for_producing = 15
     maximum_allowed_age_for_producing = 25
     max_age = 26
     producing_per_day = 8
     max_product_amount = 24
     product = Tuber
-    inventory = Tuber(0)
     needs = Water
-    needs_level = 90
     needs_decreasing_per_day = 9
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.age = 0
+        self.needs_level = 90
+        self.inventory = Tuber(0)
 
 # endregion
 
@@ -672,48 +685,58 @@ class Potato(Plant):
 class Hen(Animal):
     name = "Курица"
     buy_price = 30
-    age = 3
     minimum_required_age_for_producing = 5
     maximum_allowed_age_for_producing = 45
     max_age = 50
     producing_per_day = 2
     max_product_amount = 6
     product = Egg
-    inventory = Egg(0)
     needs = AnimalFood
-    needs_level = 90
     needs_decreasing_per_day = 5
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.age = 3
+        self.needs_level = 90
+        self.inventory = Egg(0)
+
 
 class Sheep(Animal):
     name = "Овца"
     buy_price = 50
-    age = 3
     minimum_required_age_for_producing = 10
     maximum_allowed_age_for_producing = 75
     max_age = 80
     producing_per_day = 1
     max_product_amount = 3
     product = Wool
-    inventory = Wool(0)
     needs = AnimalFood
-    needs_level = 90
     needs_decreasing_per_day = 15
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.age = 3
+        self.needs_level = 90
+        self.inventory = Wool(0)
 
 
 class Cow(Animal):
     name = "Корова"
     buy_price = 150
-    age = 3
     minimum_required_age_for_producing = 15
     maximum_allowed_age_for_producing = 95
     max_age = 100
     producing_per_day = 3
     max_product_amount = 3
     product = Milk
-    inventory = Milk(0)
     needs = AnimalFood
-    needs_level = 90
     needs_decreasing_per_day = 25
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.age = 3
+        self.needs_level = 90
+        self.inventory = Milk(0)
 
 # endregion
 
@@ -722,27 +745,33 @@ class Cow(Animal):
 class Field(Building):
     name = "Поле"
     buy_price = 1000
-    lvl = 1
     max_lvl = 5
     _base_upgrade_price = 150
     _upgrade_price_coeff = 1.5
     slots = 16
     _slots_growth_with_lvl = 4
     can_contain_types = (Wheat, Corn, Potato)
-    inventory = []
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.lvl = 1
+        self.inventory = []
 
 
 class Barn(Building):
     name = "Амбар"
     buy_price = 600
-    lvl = 1
     max_lvl = 5
     _base_upgrade_price = 250
     _upgrade_price_coeff = 2
     slots = 8
     _slots_growth_with_lvl = 4
     can_contain_types = (Hen, Sheep, Cow)
-    inventory = []
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.lvl = 1
+        self.inventory = []
 
 # endregion
 
